@@ -79,14 +79,12 @@ def main():
             # Filter the VLAN information
             vlan_info = filter_vlan_info(vlan_output)
             
-            # Append the filtered VLAN data to the DataFrame
-            for vlan_id, vlan_name, subnet in vlan_info:
-                vlan_results = vlan_results.append({
-                    'Hostname': hostname,
-                    'Vlan ID': vlan_id,
-                    'Name': vlan_name,
-                    'Subnet': subnet
-                }, ignore_index=True)
+            # Create a temporary DataFrame for the current hostname's VLAN data
+            temp_df = pd.DataFrame(vlan_info, columns=['Vlan ID', 'Name', 'Subnet'])
+            temp_df['Hostname'] = hostname  # Add the hostname to the DataFrame
+            
+            # Use concat instead of append
+            vlan_results = pd.concat([vlan_results, temp_df], ignore_index=True)
         else:
             print(f"Failed to retrieve VLAN information from {hostname}.")
     
