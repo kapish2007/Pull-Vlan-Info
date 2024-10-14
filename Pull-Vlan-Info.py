@@ -34,25 +34,31 @@ def filter_vlan_info(vlan_output):
     vlan_lines = vlan_output.splitlines()
 
     vlan_data = []
-    for line in vlan_lines:
-        if "default" not in line:  # Ignore lines with 'default'
-            columns = line.split()
-            if len(columns) > 1:  # Check if the line contains VLAN data
-                vlan_id = columns[0]
-                vlan_full_name = columns[1]
-                
-                # Split VLAN name and subnet by the last occurrence of either '-' or '_'
-                if '-' in vlan_full_name:
-                    vlan_name = vlan_full_name.rsplit('-', 1)[0]  # Name before the last dash
-                    subnet = vlan_full_name.rsplit('-', 1)[1]     # Subnet after the last dash
-                elif '_' in vlan_full_name:
-                    vlan_name = vlan_full_name.rsplit('_', 1)[0]  # Name before the last underscore
-                    subnet = vlan_full_name.rsplit('_', 1)[1]     # Subnet after the last underscore
-                else:
-                    vlan_name = vlan_full_name
-                    subnet = ""  # No subnet info found
-                
-                vlan_data.append((vlan_id, vlan_name, subnet))
+    # Skip the first 3 header lines and start processing the actual data
+    for line in vlan_lines[3:]:
+        columns = line.split()
+
+        # Check if the first column is a VLAN ID (numeric) and there are at least two columns
+        if len(columns) > 1 and columns[0].isdigit():
+            vlan_id = columns[0]
+            vlan_full_name = columns[1]
+
+            # Split VLAN name and subnet by the last occurrence of either '-' or '_'
+            if '-' in vlan_full_name:
+                vlan_name = vlan_full_name.rsplit('-', 1)[0]  # Name before the last dash
+                subnet = vlan_full_name.rsplit('-', 1)[1]     # Subnet after the last dash
+            elif '_' in vlan_full_name:
+                vlan_name = vlan_full_name.rsplit('_', 1)[0]  # Name before the last underscore
+                subnet = vlan_full_name.rsplit('_', 1)[1]     # Subnet after the last underscore
+            else:
+                vlan_name = vlan_full_name
+                subnet = ""  # No subnet info found
+
+            # Add the VLAN ID, Name, and Subnet to the list
+            vlan_data.append((vlan_id, vlan_name, subnet))
+        
+        # If the line contains only port information or any other non-VLAN ID data, skip it
+        # No action is needed for lines that do not begin with a numeric VLAN ID.
     
     return vlan_data
 
